@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowUpDown, Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { ArrowUpDown, Loader2, TrendingUp, TrendingDown } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 const tokens = [
@@ -16,13 +17,24 @@ const tokens = [
   { symbol: "MILHO", name: "Corn Token", balance: "123.45", price: 687.45 },
 ]
 
-export function SwapInterface() {
+export function SwapInterface({ marketData = [] }) {
   const [fromToken, setFromToken] = useState("USSA")
   const [toToken, setToToken] = useState("SOJA")
   const [fromAmount, setFromAmount] = useState("")
   const [toAmount, setToAmount] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [realTimePrices, setRealTimePrices] = useState({})
   const { toast } = useToast()
+
+  useEffect(() => {
+    const priceMap = {}
+    if (Array.isArray(marketData)) {
+      marketData.forEach((item) => {
+        priceMap[item.symbol] = item.price
+      })
+    }
+    setRealTimePrices(priceMap)
+  }, [marketData])
 
   const handleSwapTokens = () => {
     const temp = fromToken
@@ -32,10 +44,14 @@ export function SwapInterface() {
     setToAmount(fromAmount)
   }
 
+  const getCurrentPrice = (symbol) => {
+    return realTimePrices[symbol] || tokens.find((t) => t.symbol === symbol)?.price || 1
+  }
+
   const calculateSwap = (amount: string) => {
     if (!amount) return ""
-    const fromPrice = tokens.find((t) => t.symbol === fromToken)?.price || 1
-    const toPrice = tokens.find((t) => t.symbol === toToken)?.price || 1
+    const fromPrice = getCurrentPrice(fromToken)
+    const toPrice = getCurrentPrice(toToken)
     const result = (Number.parseFloat(amount) * fromPrice) / toPrice
     return result.toFixed(6)
   }
@@ -50,26 +66,46 @@ export function SwapInterface() {
 
     setIsLoading(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      toast({
-        title: "Swap Successful",
-        description: `Swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
+      const response = await fetch("/api/trading/swap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromToken,
+          toToken,
+          fromAmount,
+          toAmount,
+          fromPrice: getCurrentPrice(fromToken),
+          toPrice: getCurrentPrice(toToken),
+        }),
       })
 
-      // Reset form
-      setFromAmount("")
-      setToAmount("")
+      const result = await response.json()
+
+      if (result.success) {
+        toast({
+          title: "Swap Successful",
+          description: `Swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
+        })
+
+        setFromAmount("")
+        setToAmount("")
+      } else {
+        throw new Error(result.error)
+      }
     } catch (error) {
       toast({
         title: "Swap Failed",
-        description: "Please try again later",
+        description: error.message || "Please try again later",
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const getMarketInfo = (symbol) => {
+    if (!Array.isArray(marketData)) return null
+    return marketData.find((item) => item.symbol === symbol)
   }
 
   return (
@@ -86,7 +122,18 @@ export function SwapInterface() {
               <SelectContent>
                 {tokens.map((token) => (
                   <SelectItem key={token.symbol} value={token.symbol}>
-                    {token.symbol}
+                    <div className="flex items-center gap-2">
+                      <span>{token.symbol}</span>
+                      {getMarketInfo(token.symbol) && (
+                        <div className="flex items-center gap-1">
+                          {getMarketInfo(token.symbol).change >= 0 ? (
+                            <TrendingUp className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <TrendingDown className="h-3 w-3 text-red-500" />
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -94,6 +141,7 @@ export function SwapInterface() {
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Balance</p>
               <p className="text-sm font-medium">{tokens.find((t) => t.symbol === fromToken)?.balance}</p>
+              <p className="text-xs text-muted-foreground">${getCurrentPrice(fromToken).toFixed(2)}</p>
             </div>
           </div>
           <Input
@@ -130,7 +178,18 @@ export function SwapInterface() {
               <SelectContent>
                 {tokens.map((token) => (
                   <SelectItem key={token.symbol} value={token.symbol}>
-                    {token.symbol}
+                    <div className="flex items-center gap-2">
+                      <span>{token.symbol}</span>
+                      {getMarketInfo(token.symbol) && (
+                        <div className="flex items-center gap-1">
+                          {getMarketInfo(token.symbol).change >= 0 ? (
+                            <TrendingUp className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <TrendingDown className="h-3 w-3 text-red-500" />
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -138,6 +197,7 @@ export function SwapInterface() {
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Balance</p>
               <p className="text-sm font-medium">{tokens.find((t) => t.symbol === toToken)?.balance}</p>
+              <p className="text-xs text-muted-foreground">${getCurrentPrice(toToken).toFixed(2)}</p>
             </div>
           </div>
           <Input
@@ -160,6 +220,10 @@ export function SwapInterface() {
             </span>
           </div>
           <div className="flex justify-between">
+            <span className="text-muted-foreground">Market Spread</span>
+            <span>0.1%</span>
+          </div>
+          <div className="flex justify-between">
             <span className="text-muted-foreground">Network Fee</span>
             <span>~$0.50</span>
           </div>
@@ -167,6 +231,14 @@ export function SwapInterface() {
             <span className="text-muted-foreground">Slippage</span>
             <span>0.5%</span>
           </div>
+          {marketData.length > 0 && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Data Source</span>
+              <Badge variant="outline" className="text-xs">
+                Live Market
+              </Badge>
+            </div>
+          )}
         </div>
       </Card>
 

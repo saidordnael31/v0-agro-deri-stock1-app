@@ -1,7 +1,7 @@
 "use client"
 
 import { Sidebar } from "@/components/sidebar"
-import { VaultInterface } from "@/components/defi/vault-interface"
+import { EnhancedVaultInterface } from "@/components/defi/enhanced-vault-interface"
 import { useRouter } from "next/navigation"
 
 export default function VaultsPage() {
@@ -35,8 +35,8 @@ export default function VaultsPage() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar activeSection="defi" onSectionChange={handleSectionChange} />
-      <main className="flex-1 overflow-hidden">
-        <VaultInterface />
+      <main className="flex-1 overflow-hidden p-6">
+        <EnhancedVaultInterface />
       </main>
     </div>
   )

@@ -75,7 +75,7 @@ export function WrForm() {
       case "expired":
         return <Badge className="bg-red-600/20 text-red-400 border-red-600/30">Expirado</Badge>
       case "used":
-        return <Badge className="bg-gray-600/20 text-gray-400 border-gray-600/30">Utilizado</Badge>
+        return <Badge className="bg-gray-600/20 text-gray-200 border-gray-600/30">Utilizado</Badge>
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
@@ -214,10 +214,10 @@ export function WrForm() {
                               <span className="font-medium">{receipt.id}</span>
                               {getStatusBadge(receipt.status)}
                             </div>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-gray-200">
                               {receipt.volume} {receipt.unit} de {receipt.commodity} - Classificação {receipt.grade}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-300">
                               {receipt.warehouse} • Vence em {new Date(receipt.expiryDate).toLocaleDateString("pt-BR")}
                             </p>
                           </div>

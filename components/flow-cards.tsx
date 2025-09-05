@@ -61,7 +61,7 @@ export function FlowCards() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Como Funciona o Ecossistema AgroDeri</h2>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-200 text-lg">
             Entenda o fluxo completo da produção agrícola até os instrumentos DeFi
           </p>
         </div>

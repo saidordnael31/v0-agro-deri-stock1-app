@@ -1,7 +1,7 @@
 "use client"
 
 import { Sidebar } from "@/components/sidebar"
-import { SblcManager } from "@/components/finance/sblc-manager"
+import { SblcWizard } from "@/components/finance/sblc-wizard"
 import { useRouter } from "next/navigation"
 
 export default function SblcPage() {
@@ -35,8 +35,8 @@ export default function SblcPage() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar activeSection="sblc" onSectionChange={handleSectionChange} />
-      <main className="flex-1 overflow-hidden">
-        <SblcManager />
+      <main className="flex-1 overflow-hidden p-6">
+        <SblcWizard />
       </main>
     </div>
   )
