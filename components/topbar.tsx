@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Wallet, Menu } from "lucide-react"
+import { Wallet, Menu, UserPlus } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -85,6 +85,15 @@ export function Topbar({ onMobileMenuToggle }: TopbarProps) {
         <div className="flex items-center space-x-4">
           {/* Primary CTAs */}
           <div className="hidden lg:flex items-center space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white bg-transparent"
+              onClick={() => router.push("/onboarding")}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Começar
+            </Button>
             <Button
               variant="outline"
               size="sm"
