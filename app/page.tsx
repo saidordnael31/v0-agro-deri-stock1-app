@@ -1,8 +1,8 @@
 "use client"
 
 import { Topbar } from "@/components/topbar"
-import { Hero } from "@/components/hero"
-import { FlowCards } from "@/components/flow-cards"
+import { PersonaSelector } from "@/components/persona-selector"
+import { AgdUtilityExplainer } from "@/components/agd-utility-explainer"
 import { KpiBar } from "@/components/kpi-bar"
 
 export default function HomePage() {
@@ -10,8 +10,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <Topbar />
       <KpiBar />
-      <Hero />
-      <FlowCards />
+      <AgdUtilityExplainer />
+      <PersonaSelector />
     </div>
   )
 }

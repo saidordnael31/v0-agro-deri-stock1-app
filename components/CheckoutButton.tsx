@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useEffect, useRef, useState } from "react"
 
 type CheckoutType = "BUY_AGD" | "CUSTODY_DEPOSIT" | "CUSTODY_WITHDRAW"
@@ -12,9 +14,10 @@ type Props = {
   label?: string // texto do botão
   className?: string
   onSettled?: (info: { intentId: string; txHash?: string }) => void
+  children?: React.ReactNode // Added children prop for button content
 }
 
-export default function CheckoutButton({
+export function CheckoutButton({
   type,
   asset = "AGD",
   amount = 0,
@@ -22,6 +25,7 @@ export default function CheckoutButton({
   label,
   className,
   onSettled,
+  children,
 }: Props) {
   const [loading, setLoading] = useState(false)
   const [intentId, setIntentId] = useState<string | null>(null)
@@ -95,10 +99,12 @@ export default function CheckoutButton({
       className={className ?? "px-4 py-2 rounded-2xl bg-cyan-300/20 hover:bg-cyan-300/30 border border-cyan-400/40"}
       title={type}
     >
-      {loading ? "Abrindo checkout..." : (label ?? defaultLabel(type, asset))}
+      {loading ? "Abrindo checkout..." : (children ?? label ?? defaultLabel(type, asset))}
     </button>
   )
 }
+
+export default CheckoutButton
 
 function defaultLabel(type: CheckoutType, asset: string) {
   if (type === "BUY_AGD") return "Comprar AGD"
