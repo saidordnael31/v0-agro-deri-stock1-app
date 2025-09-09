@@ -1,13 +1,14 @@
 "use client"
 
-import { RoleGate } from "@/components/RoleGate"
+import { Topbar } from "@/components/topbar"
 import { LandRegisterForm } from "@/components/rwa/land-register-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Shield, FileText } from "lucide-react"
 
 export default function LandRegisterPage() {
   return (
-    <RoleGate allowedRoles={["farmer", "trader"]} requiredTier="pro">
+    <div className="min-h-screen bg-background">
+      <Topbar />
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center gap-3">
           <MapPin className="h-8 w-8 text-[#00FFD1]" />
@@ -68,6 +69,6 @@ export default function LandRegisterPage() {
           </div>
         </div>
       </div>
-    </RoleGate>
+    </div>
   )
 }

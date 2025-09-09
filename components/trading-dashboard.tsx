@@ -6,12 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown, DollarSign, BarChart3, Wifi, WifiOff } from "lucide-react"
+import { TrendingUp, TrendingDown, DollarSign, BarChart3, Wifi, WifiOff, RefreshCw } from "lucide-react"
 import { SwapInterface } from "@/components/trading/swap-interface"
 import { SpotInterface } from "@/components/trading/spot-interface"
 import { FuturesInterface } from "@/components/trading/futures-interface"
 import { OptionsInterface } from "@/components/trading/options-interface"
 import { MarketTicker } from "@/components/MarketTicker"
+import { useToast } from "@/hooks/use-toast"
 
 const portfolioStats = [
   { label: "Total Balance", value: "$124,567.89", change: "+2.34%", positive: true },
@@ -23,57 +24,58 @@ const portfolioStats = [
 export function TradingDashboard() {
   const searchParams = useSearchParams()
   const tabFromUrl = searchParams.get("tab") || "swap"
+  const { toast } = useToast()
 
   const [marketData, setMarketData] = useState([])
   const [isConnected, setIsConnected] = useState(false)
   const [selectedExchange, setSelectedExchange] = useState("CME")
+  const [isLoading, setIsLoading] = useState(false)
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
 
   useEffect(() => {
-    const fetchMarketData = async () => {
-      try {
-        const response = await fetch("/api/markets/quotes?symbols=SOJA,MILHO,CAFE,ACUCAR&exchange=" + selectedExchange)
-        const data = await response.json()
-        if (data.success) {
-          setMarketData(data.data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch market data:", error)
-      }
-    }
-
-    // Initial fetch
     fetchMarketData()
 
-    // Setup WebSocket for real-time updates
-    const ws = new WebSocket(`ws://localhost:3000/api/markets/ws?exchange=${selectedExchange}`)
-
-    ws.onopen = () => {
-      setIsConnected(true)
-      console.log("Connected to market data feed")
-    }
-
-    ws.onmessage = (event) => {
-      const update = JSON.parse(event.data)
-      setMarketData((prev) => prev.map((item) => (item.symbol === update.symbol ? { ...item, ...update } : item)))
-    }
-
-    ws.onclose = () => {
-      setIsConnected(false)
-      console.log("Disconnected from market data feed")
-    }
-
-    // Fallback polling every 5 seconds if WebSocket fails
-    const interval = setInterval(fetchMarketData, 5000)
-
-    return () => {
-      ws.close()
-      clearInterval(interval)
-    }
+    console.log("[v0] Trading Dashboard: Using REST API polling only")
+    setIsConnected(false)
+    const interval = setInterval(fetchMarketData, 30000)
+    return () => clearInterval(interval)
   }, [selectedExchange])
+
+  const fetchMarketData = async () => {
+    setIsLoading(true)
+    try {
+      const symbols = ["SOJA", "MILHO", "CAFE", "ZCZ5", "ZSZ5"]
+      const response = await fetch(`/api/markets/quotes?symbols=${symbols.join(",")}&exchange=${selectedExchange}`)
+      const data = await response.json()
+
+      if (data.success) {
+        setMarketData(data.data.quotes || [])
+        setLastUpdate(new Date())
+      } else {
+        throw new Error(data.error || "Failed to fetch market data")
+      }
+    } catch (error) {
+      console.error("Failed to fetch market data:", error)
+      toast({
+        title: "Market Data Error",
+        description: "Failed to fetch latest market data. Using cached data.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRefreshData = () => {
+    fetchMarketData()
+    toast({
+      title: "Data Refreshed",
+      description: "Market data has been updated successfully.",
+    })
+  }
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between">
           <div>
@@ -88,7 +90,10 @@ export function TradingDashboard() {
                 ) : (
                   <WifiOff className="h-4 w-4 text-red-500" />
                 )}
-                <span className="text-sm text-muted-foreground">{isConnected ? "Live" : "Offline"}</span>
+                <span className="text-sm text-muted-foreground">{isConnected ? "Live" : "Demo Mode"}</span>
+                {lastUpdate && (
+                  <span className="text-xs text-muted-foreground ml-2">{lastUpdate.toLocaleTimeString()}</span>
+                )}
               </div>
               <select
                 value={selectedExchange}
@@ -100,6 +105,9 @@ export function TradingDashboard() {
                 <option value="B3">B3</option>
                 <option value="DCE">DCE</option>
               </select>
+              <Button variant="outline" size="sm" onClick={handleRefreshData} disabled={isLoading}>
+                {isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
             </div>
             <Button variant="outline" size="sm">
               Connect Wallet
@@ -111,14 +119,11 @@ export function TradingDashboard() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 p-6 overflow-auto">
-        {/* Market Ticker */}
         <div className="mb-6">
           <MarketTicker />
         </div>
 
-        {/* Portfolio Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {portfolioStats.map((stat, index) => (
             <Card key={index}>
@@ -138,17 +143,16 @@ export function TradingDashboard() {
           ))}
         </div>
 
-        {/* Trading Interface */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Market Data */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
                 Market Overview - {selectedExchange}
-                <Badge variant={isConnected ? "default" : "destructive"} className="ml-2">
-                  {isConnected ? "Live" : "Delayed"}
+                <Badge variant="secondary" className="ml-2">
+                  Demo Data
                 </Badge>
+                {isLoading && <RefreshCw className="h-4 w-4 animate-spin ml-2" />}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -190,13 +194,14 @@ export function TradingDashboard() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">Loading market data...</div>
+                  <div className="text-center py-8 text-muted-foreground">
+                    {isLoading ? "Loading market data..." : "No market data available"}
+                  </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Trading Panel */}
           <Card>
             <CardHeader>
               <CardTitle>Quick Trade</CardTitle>

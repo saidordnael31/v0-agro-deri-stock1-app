@@ -41,11 +41,11 @@ export function KpiBar() {
   const getHealthColor = (health: string) => {
     switch (health) {
       case "healthy":
-        return "text-green-500"
+        return "text-success"
       case "warning":
-        return "text-yellow-500"
+        return "text-warning"
       case "critical":
-        return "text-red-500"
+        return "text-error"
       default:
         return "text-gray-500"
     }
@@ -57,25 +57,25 @@ export function KpiBar() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-[#00FFD1]" />
+              <TrendingUp className="h-5 w-5 text-brand-primary" />
               <span className="text-sm text-gray-400">TVL Stablecoins:</span>
-              <span className="font-semibold text-[#00FFD1]">{formatCurrency(kpiData.tvl)}</span>
+              <span className="font-semibold text-brand-primary">{formatCurrency(kpiData.tvl)}</span>
             </div>
 
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-500" />
+              <Shield className="h-5 w-5 text-info" />
               <span className="text-sm text-gray-400">Backstop Fund:</span>
-              <span className="font-semibold text-blue-500">{formatCurrency(kpiData.backstopFund)}</span>
+              <span className="font-semibold text-info">{formatCurrency(kpiData.backstopFund)}</span>
             </div>
 
             <div className="flex items-center gap-2">
               <div
                 className={`h-2 w-2 rounded-full ${
                   kpiData.backstopHealth === "healthy"
-                    ? "bg-green-500"
+                    ? "bg-success"
                     : kpiData.backstopHealth === "warning"
-                      ? "bg-yellow-500"
-                      : "bg-red-500"
+                      ? "bg-warning"
+                      : "bg-error"
                 }`}
               />
               <span className="text-sm text-gray-400">Status:</span>

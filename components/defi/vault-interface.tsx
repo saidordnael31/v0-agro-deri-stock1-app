@@ -76,12 +76,31 @@ export function VaultInterface() {
 
     setIsLoading(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch("/api/defi/vaults", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vaultId: selectedVault.id,
+          action,
+          amount: Number.parseFloat(amount),
+          asset: selectedVault.asset,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Vault operation failed")
+
+      const result = await response.json()
 
       toast({
         title: `${action === "deposit" ? "Deposit" : "Withdrawal"} Successful`,
-        description: `${action === "deposit" ? "Deposited" : "Withdrew"} ${amount} ${selectedVault.asset} ${action === "deposit" ? "to" : "from"} ${selectedVault.name}`,
+        description: `${action === "deposit" ? "Deposited" : "Withdrew"} ${amount} ${selectedVault.asset} ${action === "deposit" ? "to" : "from"} ${selectedVault.name}. TX: ${result.txHash}`,
       })
+
+      if (action === "deposit") {
+        selectedVault.userDeposit += Number.parseFloat(amount)
+      } else {
+        selectedVault.userDeposit -= Number.parseFloat(amount)
+      }
 
       setAmount("")
     } catch (error) {

@@ -1,42 +1,22 @@
 "use client"
 
-import { Sidebar } from "@/components/sidebar"
+import { Topbar } from "@/components/topbar"
 import { MintInterface } from "@/components/defi/mint-interface"
-import { useRouter } from "next/navigation"
+import { CryptoCollateralManager } from "@/components/defi/crypto-collateral-manager"
 
 export default function MintPage() {
-  const router = useRouter()
-
-  const handleSectionChange = (section: string) => {
-    switch (section) {
-      case "trading":
-        router.push("/trade")
-        break
-      case "defi":
-        router.push("/defi/mint")
-        break
-      case "sblc":
-        router.push("/defi/sblc")
-        break
-      case "logistics":
-        router.push("/defi/logistics")
-        break
-      case "risk":
-        router.push("/analytics/risk")
-        break
-      case "settings":
-        router.push("/account")
-        break
-      default:
-        break
-    }
-  }
-
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar activeSection="defi" onSectionChange={handleSectionChange} />
-      <main className="flex-1 overflow-hidden">
-        <MintInterface />
+    <div className="min-h-screen bg-background">
+      <Topbar />
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <MintInterface />
+          </div>
+          <div className="space-y-6">
+            <CryptoCollateralManager />
+          </div>
+        </div>
       </main>
     </div>
   )

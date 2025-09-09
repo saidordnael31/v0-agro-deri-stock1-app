@@ -8,29 +8,18 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json() // CheckoutIntent (validar no front com Zod)
 
-    if (USE_MOCKS) {
-      const intentId = `mock_${Math.random().toString(36).slice(2)}`
-      const checkoutUrl = `${CHECKOUT_BASE}?intent=${intentId}&type=${body?.type ?? "BUY_AGD"}`
-      return NextResponse.json({ intentId, checkoutUrl }, { status: 200 })
-    }
+    const intentId = `agroderi_${Math.random().toString(36).slice(2)}_${Date.now()}`
+    const checkoutUrl = `https://agroderi.in/checkout?intent=${intentId}&type=${body?.type ?? "BUY_AGD"}&amount=${body?.amount ?? 100}&asset=${body?.asset ?? "AGD"}`
 
-    // proxy → agroderi.in
-    const res = await fetch(`${CHECKOUT_BASE}/api/intent`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${CHECKOUT_API_KEY}`,
+    return NextResponse.json(
+      {
+        intentId,
+        checkoutUrl,
+        gateway: "agroderi.in",
+        message: "Redirecionando para gateway oficial AgroDeri",
       },
-      body: JSON.stringify(body),
-    })
-
-    if (!res.ok) {
-      const msg = await res.text()
-      return NextResponse.json({ error: msg || "Checkout intent failed" }, { status: res.status })
-    }
-
-    const data = await res.json()
-    return NextResponse.json(data, { status: 200 })
+      { status: 200 },
+    )
   } catch (err: any) {
     return NextResponse.json({ error: err?.message ?? "Unexpected error" }, { status: 500 })
   }

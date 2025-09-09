@@ -61,6 +61,7 @@ const oracles = [
 export function OracleMonitor() {
   const [selectedOracle, setSelectedOracle] = useState(oracles[0])
   const [refreshing, setRefreshing] = useState(false)
+  const [oracleData, setOracleData] = useState(oracles)
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -90,16 +91,33 @@ export function OracleMonitor() {
 
   const handleRefresh = async () => {
     setRefreshing(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setRefreshing(false)
+    try {
+      const response = await fetch("/api/oracles/data", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (response.ok) {
+        const updatedData = await response.json()
+        setOracleData(updatedData.oracles || oracles)
+
+        const updatedSelected = updatedData.oracles?.find((o) => o.id === selectedOracle.id)
+        if (updatedSelected) {
+          setSelectedOracle(updatedSelected)
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refresh oracle data:", error)
+    } finally {
+      setRefreshing(false)
+    }
   }
 
   return (
     <div className="space-y-4">
       {/* Oracle List */}
       <div className="space-y-2">
-        {oracles.map((oracle) => (
+        {oracleData.map((oracle) => (
           <Card
             key={oracle.id}
             className={`cursor-pointer transition-all ${

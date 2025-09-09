@@ -4,9 +4,10 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckoutButton } from "@/components/CheckoutButton"
 import { ArrowRight, TrendingUp, Wheat, Factory, Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { ServiceSequence } from "@/components/service-sequence"
+import { CheckoutButton } from "@/components/CheckoutButton"
 
 const personas = [
   {
@@ -136,7 +137,7 @@ export function PersonaSelector() {
                   <div className="bg-gray-800/50 p-3 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-400">Entrada AGD</span>
-                      <Badge variant="outline" className="text-[#00FFD1] border-[#00FFD1]">
+                      <Badge variant="outline" className="bg-[#00FFD1] text-black border-[#00FFD1]">
                         Utility Token
                       </Badge>
                     </div>
@@ -175,26 +176,15 @@ export function PersonaSelector() {
                   {/* Expanded Flow */}
                   {isSelected && (
                     <div className="mt-4 p-3 bg-gray-800/30 rounded-lg border border-[#00FFD1]/20">
-                      <div className="text-sm font-medium text-[#00FFD1] mb-2">Fluxo Completo:</div>
-                      <div className="space-y-2">
-                        {persona.flow.map((step, index) => (
-                          <div key={index} className="text-xs text-gray-300 flex items-start gap-2">
-                            <div className="w-4 h-4 rounded-full bg-[#00FFD1]/20 flex items-center justify-center mt-0.5">
-                              <div className="w-1.5 h-1.5 rounded-full bg-[#00FFD1]" />
-                            </div>
-                            {step}
-                          </div>
-                        ))}
-                      </div>
+                      <ServiceSequence persona={persona.id as any} />
 
                       <div className="mt-4 space-y-2">
                         <CheckoutButton
-                          amount={persona.agdAmount.split(" ")[0]}
-                          currency="AGD"
-                          description={`Comprar ${persona.agdAmount} para ${persona.title}`}
-                          className="w-full bg-[#00FFD1] text-black hover:bg-[#00FFD1]/90"
+                          type="BUY_AGD"
+                          amount={Number.parseInt(persona.agdAmount.replace(/[^\d]/g, ""))}
+                          className="w-full bg-[#00FFD1] text-black hover:bg-[#00FFD1]/90 px-4 py-2 rounded-lg font-medium"
                         >
-                          Comprar {persona.agdAmount}
+                          Comprar {persona.agdAmount} via AgroDeri.in
                         </CheckoutButton>
 
                         <Button

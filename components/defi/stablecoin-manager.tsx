@@ -17,9 +17,13 @@ const stablecoins = [
 ]
 
 const collateralAssets = [
-  { symbol: "SOJA", name: "Soybean Tokens", balance: "45.78", price: 1456.78 },
-  { symbol: "MILHO", name: "Corn Tokens", balance: "123.45", price: 687.45 },
-  { symbol: "CAFE", name: "Coffee Tokens", balance: "23.67", price: 2134.56 },
+  { symbol: "BTC", name: "Bitcoin", balance: "0.45", price: 67234.56, type: "crypto" },
+  { symbol: "ETH", name: "Ethereum", balance: "12.34", price: 3456.78, type: "crypto" },
+  { symbol: "USDC", name: "USD Coin", balance: "5000.00", price: 1.0, type: "crypto" },
+  { symbol: "WBTC", name: "Wrapped Bitcoin", balance: "0.23", price: 67180.45, type: "crypto" },
+  { symbol: "SOJA", name: "Soybean Tokens", balance: "45.78", price: 1456.78, type: "commodity" },
+  { symbol: "MILHO", name: "Corn Tokens", balance: "123.45", price: 687.45, type: "commodity" },
+  { symbol: "CAFE", name: "Coffee Tokens", balance: "23.67", price: 2134.56, type: "commodity" },
 ]
 
 export function StablecoinManager() {
@@ -88,14 +92,30 @@ export function StablecoinManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {collateralAssets.map((asset) => (
-                      <SelectItem key={asset.symbol} value={asset.symbol}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{asset.name}</span>
-                          <span className="ml-2 text-xs text-muted-foreground">{asset.balance} available</span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <div className="px-2 py-1 text-xs font-medium text-muted-foreground">Criptomoedas</div>
+                    {collateralAssets
+                      .filter((asset) => asset.type === "crypto")
+                      .map((asset) => (
+                        <SelectItem key={asset.symbol} value={asset.symbol}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{asset.name}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">{asset.balance} available</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    <div className="px-2 py-1 text-xs font-medium text-muted-foreground border-t mt-1 pt-2">
+                      Commodities Agrícolas
+                    </div>
+                    {collateralAssets
+                      .filter((asset) => asset.type === "commodity")
+                      .map((asset) => (
+                        <SelectItem key={asset.symbol} value={asset.symbol}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{asset.name}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">{asset.balance} available</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

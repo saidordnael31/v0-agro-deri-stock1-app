@@ -1,13 +1,14 @@
 "use client"
 
-import { RoleGate } from "@/components/RoleGate"
+import { Topbar } from "@/components/topbar"
 import { CropTokenizationWizard } from "@/components/rwa/crop-tokenization-wizard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Sprout, TrendingUp, Calendar } from "lucide-react"
 
 export default function FutureCropsPage() {
   return (
-    <RoleGate allowedRoles={["farmer"]} requiredTier="retail">
+    <div className="min-h-screen bg-background">
+      <Topbar />
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center gap-3">
           <Sprout className="h-8 w-8 text-[#00FFD1]" />
@@ -105,6 +106,6 @@ export default function FutureCropsPage() {
           </div>
         </div>
       </div>
-    </RoleGate>
+    </div>
   )
 }
